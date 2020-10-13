@@ -23,7 +23,7 @@ Works only with BitStrings, a length of 12 bytes should be enough to check all t
 ```elixir
 { :ok, file } = File.open( "test/image.png", [ :read ] )
 data = IO.binread( file, :all )
-mime( data )
+Magickmime.mime( data )
 :png
 ```
 
