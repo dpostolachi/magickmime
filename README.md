@@ -1,6 +1,6 @@
 # Magickmime
 
-**TODO: Add description**
+Guess MIME type by file signatures.
 
 ## Installation
 
