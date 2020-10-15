@@ -24,7 +24,7 @@ Works only with BitStrings, a length of 12 bytes should be enough to check all t
 { :ok, file } = File.open( "test/image.png", [ :read ] )
 data = IO.binread( file, :all )
 Magickmime.mime( data )
-:png
+"image/png"
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
