@@ -6,19 +6,24 @@ defmodule MagickmimeTest do
   test "png test" do
     {:ok, file} = File.open("test/image.png", [:read])
     data = IO.binread( file, :all )
-    assert mime( data ) == "image/png"
+    assert guess( data ) == "image/png"
+    assert is?( data, "image/*" )
+    assert is?( data, "image/png" )
   end
 
   test "jpeg test" do
     {:ok, file} = File.open("test/image.jpg", [:read])
     data = IO.binread( file, :all )
-    assert mime( data ) == "image/jpeg"
+    assert guess( data ) == "image/jpeg"
+    assert is?( data, "image/jpeg" )
+    assert is?( data, [ "image/png", "image/jpeg" ] )
   end
 
   test "bmp test" do
     {:ok, file} = File.open("test/image.bmp", [:read])
     data = IO.binread( file, :all )
-    assert mime( data ) == "image/bmp"
+    assert guess( data ) == "image/bmp"
+    assert not is?(data, [ "image/png", "image/jpeg" ] )
   end
 
 end

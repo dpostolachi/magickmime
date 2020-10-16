@@ -1,4 +1,7 @@
 defprotocol Magickmime do
-  @spec mime(binary) :: atom | {:error, <<_::192, _::_*32>>}
-  def mime(value)
+  @spec guess(binary) :: binary | {:error, <<_::192, _::_*32>>}
+  def guess(value)
+
+  @spec is?(binary, binary | [ binary ]) :: boolean
+  def is?(value, targets)
 end

@@ -61,34 +61,72 @@ defimpl Magickmime, for: BitString  do
   defp match_mime( type, _ ) when type in @accepted_types, do: { :error, @not_found }
   defp match_mime( _, _ ), do: { :error, @not_accepted }
 
-  @spec mime(atom, binary) :: atom | {:error, <<_::192, _::_*32>>}
-  def mime( type, bitstring )
+  @spec guess(atom, binary) :: binary | {:error, <<_::192, _::_*32>>}
+  def guess( type, bitstring )
     when is_binary( bitstring )
     and byte_size( bitstring ) > @max_size,
-  do: mime( type, :binary.part( bitstring, 0, @max_size ) )
+  do: guess( type, :binary.part( bitstring, 0, @max_size ) )
 
-  def mime( type, bitstring ) when is_binary( bitstring ) do
+  def guess( type, bitstring ) when is_binary( bitstring ) do
     case match_mime( type, bitstring )  do
       atom_mime when is_atom( atom_mime ) -> @mimes[ atom_mime ]
       err -> err
     end
   end
 
-  @spec mime(binary) :: atom | {:error, <<_::192, _::_*32>>}
-  def mime( bitstring )
+  @spec guess(binary) :: binary | {:error, <<_::192, _::_*32>>}
+  def guess( bitstring )
     when is_binary( bitstring )
     and byte_size( bitstring ) > @max_size,
-  do: mime( :binary.part( bitstring, 0, @max_size ) )
+  do: guess( :binary.part( bitstring, 0, @max_size ) )
 
-  def mime( bitstring ) when is_binary( bitstring ) do
-    with  { :error, _mess } <- mime( :image, bitstring ),
-          { :error, _mess } <- mime( :video, bitstring ),
-          { :error, mess } <- mime( :audio, bitstring )
+  def guess( bitstring ) when is_binary( bitstring ) do
+    with  { :error, _mess } <- guess( :image, bitstring ),
+          { :error, _mess } <- guess( :video, bitstring ),
+          { :error, mess } <- guess( :audio, bitstring )
     do
       { :error, mess }
     else
       mime_type ->
         mime_type
+    end
+  end
+
+  defp mime_type_valid?( source, targets ) when is_list( targets ),
+    do: Enum.any?( targets, fn target -> mime_type_valid?( source, target ) end )
+
+  defp mime_type_valid?( source, target ) when is_binary( source ) and is_binary( target ) do
+    with [ source_type, source_sub_type ] <- String.split( source, "/" ),
+        [ target | _ ] <- String.split( target, ";" ), # Remove q-factor
+        [ target_type, target_sub_type ] <- String.split( target, "/" )
+    do
+      case target_sub_type do
+          # type/*
+          "*" -> target_type == source_type
+          # type/sub_type
+          _ ->
+            case target_type do
+                # */*
+                "*" -> true
+                # type/sub_type
+                _ ->
+                  target_type == source_type &&
+                  target_sub_type == source_sub_type
+            end
+      end
+    else
+      _ ->
+          false
+    end
+  end
+
+  @spec is?(binary, binary | [ binary ]) :: boolean
+  def is?( bitstring, target ) do
+    case guess( bitstring ) do
+      { :error, _ } ->
+        false
+      mime_type when is_binary( mime_type ) ->
+        mime_type_valid?( mime_type, target )
     end
   end
 
