@@ -92,10 +92,10 @@ defimpl Magickmime, for: BitString  do
     end
   end
 
-  defp mime_type_valid?( source, targets ) when is_list( targets ),
-    do: Enum.any?( targets, fn target -> mime_type_valid?( source, target ) end )
+  def matches?( source, targets ) when is_list( targets ),
+    do: Enum.any?( targets, fn target -> matches?( source, target ) end )
 
-  defp mime_type_valid?( source, target ) when is_binary( source ) and is_binary( target ) do
+  def matches?( source, target ) when is_binary( source ) and is_binary( target ) do
     with [ source_type, source_sub_type ] <- String.split( source, "/" ),
         [ target | _ ] <- String.split( target, ";" ), # Remove q-factor
         [ target_type, target_sub_type ] <- String.split( target, "/" )
@@ -126,7 +126,7 @@ defimpl Magickmime, for: BitString  do
       { :error, _ } ->
         false
       mime_type when is_binary( mime_type ) ->
-        mime_type_valid?( mime_type, target )
+        matches?( mime_type, target )
     end
   end
 
