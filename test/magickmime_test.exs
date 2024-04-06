@@ -26,4 +26,12 @@ defmodule MagickmimeTest do
     assert not is?(data, [ "image/png", "image/jpeg" ] )
   end
 
+  test "avif test" do
+    {:ok, file} = File.open("test/output3.avif", [:read])
+    data = IO.binread( file, :all )
+    assert guess( data ) == "image/avif"
+    assert is?( data, [ "image/avif" ] )
+    assert is?( data, [ "image/*" ] )
+  end
+
 end
