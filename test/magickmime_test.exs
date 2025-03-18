@@ -34,4 +34,12 @@ defmodule MagickmimeTest do
     assert is?( data, [ "image/*" ] )
   end
 
+  test "svg test" do
+    {:ok, file} = File.open("test/image.svg", [:read])
+    data = IO.binread( file, :all )
+    assert guess( data ) == "image/svg+xml"
+    assert is?( data, [ "image/svg+xml" ] )
+    assert is?( data, [ "image/*" ] )
+  end
+
 end

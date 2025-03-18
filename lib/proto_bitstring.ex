@@ -15,6 +15,7 @@ defimpl Magickmime, for: BitString  do
     :tiff => "image/tiff",
     :bmp => "image/bmp",
     :avif => "image/avif",
+    :svg => "image/svg+xml",
   }
 
   defp match_mime( :image, <<0x89, 0x50, 0x4E, 0x47, 0xD, 0xA, 0x1A, 0xA >> <> _rest ),                  do: :png
@@ -27,6 +28,10 @@ defimpl Magickmime, for: BitString  do
   defp match_mime( :image, <<0x4D, 0x4D, 0x00, 0x2A>> <> _rest ),                                        do: :tiff
   defp match_mime( :image, <<0x42, 0x4D>> <> _rest ),                                                    do: :bmp
   defp match_mime( :image, <<_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66>> <> _rest ),     do: :avif
+  # matches xml declaration
+  defp match_mime( :image, <<0x3C, 0x3F, 0x78, 0x6D, 0x6C>> <> _rest ),                                  do: :svg
+  # non standard svg, without xml declaration
+  defp match_mime( :image, <<0x3C, 0x73, 0x76, 0x67>> <> _rest ),                                        do: :svg
 
   # Audio
   @mimes Map.merge( @mimes, %{
